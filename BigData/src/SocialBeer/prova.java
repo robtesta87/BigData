@@ -24,32 +24,46 @@ public class prova {
 	public static void main(String[] args) {
 		GraphDatabaseFactory dbFactory = new GraphDatabaseFactory();
 		GraphDatabaseService db= dbFactory.newEmbeddedDatabase("/home/roberto/neo4j-community-2.3.0-M02/data/graph.db");
-		
+		/*
 		try (Transaction tx = db.beginTx()) {
 			db.schema().constraintFor(NodeType.Beer).assertPropertyIsUnique("Name").create();
+			db.schema().constraintFor(NodeType.User).assertPropertyIsUnique("NameUser").create();
 			tx.success();
-		}
+		}*/
 		
 		Node result = null;
 		ResourceIterator<Node> resultIterator = null;
 		try ( Transaction tx = db.beginTx() )
 		{
-		    String queryString = "MERGE (n:Beer {Name: {Name}}) RETURN n";
+		    String queryString = "MERGE (n:Beer {Name: {Name},Gradi: {Gradi}}) RETURN n";
 		    Map<String, Object> parameters = new HashMap<>();
 		    parameters.put( "Name", "Moretti" );
+		    parameters.put("Gradi", "4,2");
 		    resultIterator = db.execute( queryString, parameters ).columnAs( "n" );
 		    
-		    parameters.put( "Name", "Moretti" );
-		    resultIterator = db.execute( queryString, parameters ).columnAs( "n" );
-
+		    queryString = "MERGE (m:User {NameUser: {NameUser}}) RETURN m";
+		    parameters.put( "NameUser", "roberto" );
+		    resultIterator = db.execute( queryString, parameters ).columnAs( "m" );
 		    
+		    queryString = "MERGE (n:Beer {Name: {Name},Gradi: {Gradi}}) RETURN n";
 		    parameters.put( "Name", "peroni" );
+		    parameters.put("Gradi", "5,2");
 		    resultIterator = db.execute( queryString, parameters ).columnAs( "n" );
-
 		    
-		    result = resultIterator.next();
+		    /*queryString = "MERGE ((n:Beer {Name: {Name},Gradi: {Gradi}})-[:DRINK]->(m:User {NameUser: {NameUser}})) RETURN n";
+		    parameters.put( "Name", "peroni" );
+		    parameters.put("Gradi", "5,2");
+		    resultIterator = db.execute( queryString, parameters ).columnAs( "n" );
+			*/
+		    queryString = "MERGE (m:User {NameUser: {NameUser}}) RETURN m";
+		    parameters.put( "NameUser", "roberto" );
+		    resultIterator = db.execute( queryString, parameters ).columnAs( "m" );
+		    
+
+		    //result = resultIterator.next();
 		    tx.success();
 		}
+		 
 		/*
 		try (Transaction tx = db.beginTx()) {
 			Node BeerNode = db.createNode(NodeType.Beer);
