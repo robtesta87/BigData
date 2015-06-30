@@ -11,6 +11,7 @@ import org.neo4j.graphdb.DynamicLabel;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.ResourceIterator;
 import org.neo4j.graphdb.Transaction;
@@ -56,6 +57,8 @@ public class prova3 {
 			{
 				Schema schema = graphDb.schema();
 				schema.awaitIndexOnline( indexDefinitionUser, 10, TimeUnit.SECONDS );
+				schema.awaitIndexOnline( indexDefinitionBeer, 10, TimeUnit.SECONDS );
+
 			}
 			// END SNIPPET: wait
 		}
@@ -112,8 +115,8 @@ public class prova3 {
 					else
 						System.out.println("birra non trovata");
 				}
-				userNodes.get(0).createRelationshipTo(beerNodes.get(0), RelationType.drink);
-
+				Relationship relationship = userNodes.get(0).createRelationshipTo(beerNodes.get(0), RelationType.drink);
+				relationship.setProperty("review", "ciao");
 				tx.success();
 			}
 			// END SNIPPET: addUsers
