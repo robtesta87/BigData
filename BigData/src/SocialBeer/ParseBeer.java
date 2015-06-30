@@ -17,6 +17,7 @@ import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
+import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.ResourceIterator;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
@@ -28,8 +29,12 @@ import SocialBeer.prova3.RelationType;
 
 public class ParseBeer {
 
-	private static final String PATH_review10 = "/home/roberto/workspace/git/BigData/BigData/util/ratebeer10.txt";
+	private static final String PATH_review10 = "/home/roberto/workspace/git/BigData/BigData/util/ratebeer1000.txt";
 	private static final String DB_PATH = "/home/roberto/neo4j-community-2.3.0-M02/data/graph.db";
+	
+	public enum RelationType implements RelationshipType{
+		review;
+	}
 
 	public static void main(String[] args) throws IOException{
 		
@@ -84,7 +89,7 @@ public class ParseBeer {
 		}
 		// END SNIPPET: wait
 		
-		while(j<10) {
+		while(j<1000) {
 			s=b.readLine();
 			splittedLine = s.split(": ");
 			if (splittedLine[0].equals("beer/name"))
@@ -99,6 +104,21 @@ public class ParseBeer {
 				beer.setStyle(splittedLine[1]);
 			if (splittedLine[0].equals("review/profileName"))
 				user.setUserName(splittedLine[1]);
+			if (splittedLine[0].equals("review/appearance"))
+				reviewBeer.setAppearance(Double.parseDouble(splittedLine[1].split("/")[0])*2);
+			if (splittedLine[0].equals("review/aroma"))
+				reviewBeer.setAroma(Double.parseDouble(splittedLine[1].split("/")[0]));
+			if (splittedLine[0].equals("review/palate"))
+				reviewBeer.setPalate(Double.parseDouble(splittedLine[1].split("/")[0])*2);
+			if (splittedLine[0].equals("review/taste"))
+				reviewBeer.setTaste(Double.parseDouble(splittedLine[1].split("/")[0]));
+			if (splittedLine[0].equals("review/overall"))
+				reviewBeer.setOverall(Double.parseDouble(splittedLine[1].split("/")[0])/2);
+			if (splittedLine[0].equals("review/time"))
+				reviewBeer.setTime(splittedLine[1]);
+			if (splittedLine[0].equals("review/text"))
+				reviewBeer.setText(splittedLine[1]);
+				
 			System.out.println(s);
 			i++;
 			if (i==14){
@@ -112,13 +132,15 @@ public class ParseBeer {
 					Label labelUser = DynamicLabel.label( "User" );
 					Label labelBeer = DynamicLabel.label( "Beer" );
 					
-					queryString = "MERGE (n:Beer {Name: {Name},Gradi: {Gradi}}) RETURN n";
+					queryString = "MERGE (n:Beer {Name: {Name},ABV: {ABV},numberReview:{numberReview}}) RETURN n";
 				    parameters.put( "Name", beer.getBeerName() );
-				    parameters.put("Gradi", beer.getABV());
+				    parameters.put("ABV", beer.getABV());
+				    parameters.put("numberReview", 0 );
 				    resultIterator = graphDb.execute( queryString, parameters ).columnAs( "n" );
 				    
-				    queryString = "MERGE (m:User {username: {username}}) RETURN m";
+				    queryString = "MERGE (m:User {username: {username},numberReview:{numberReview}}) RETURN m";
 					parameters.put( "username", user.getUserName() );
+					parameters.put("numberReview", 0 );
 					resultIterator = graphDb.execute( queryString, parameters ).columnAs( "m" );
 					
 					ArrayList<Node> userNodes = new ArrayList<>();
@@ -145,8 +167,19 @@ public class ParseBeer {
 							System.out.println("birra non trovata");
 					}
 					
-					Relationship relationship = userNodes.get(0).createRelationshipTo(beerNodes.get(0), RelationType.drink);
-					relationship.setProperty("review", "ciao");
+					userNodes.get(0).setProperty("numberReview", (int)userNodes.get(0).getProperty("numberReview")+1);
+					beerNodes.get(0).setProperty("numberReview", (int)beerNodes.get(0).getProperty("numberReview")+1);
+					
+					Relationship relationship = userNodes.get(0).createRelationshipTo(beerNodes.get(0), RelationType.review);
+					
+					relationship.setProperty("appearance", reviewBeer.getAppearance());
+					relationship.setProperty("aroma", reviewBeer.getAroma());
+					relationship.setProperty("palate", reviewBeer.getPalate());
+					relationship.setProperty("taste", reviewBeer.getTaste());
+					relationship.setProperty("overall", reviewBeer.getOverall());
+					relationship.setProperty("time", reviewBeer.getTime());
+					relationship.setProperty("text", reviewBeer.getText());
+					
 				    
 				    tx.success();
 				}
