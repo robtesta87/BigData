@@ -1,4 +1,4 @@
-package SocialBeer;
+package test;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -25,11 +25,13 @@ import org.neo4j.graphdb.schema.IndexDefinition;
 import org.neo4j.graphdb.schema.Schema;
 import org.neo4j.io.fs.FileUtils;
 
-import test.prova3.RelationType;
+import SocialBeer.Beer;
+import SocialBeer.ReviewBeer;
+import SocialBeer.User;
 
-public class ParseBeer {
+public class parseBeerTest {
 
-	private static final String PATH_review10 = "/home/roberto/workspace/git/BigData/BigData/util/ratebeer5.txt";
+	private static final String PATH_review10 = "/home/roberto/workspace/git/BigData/BigData/util/ratebeer1000.txt";
 	private static final String DB_PATH = "/home/roberto/neo4j-community-2.3.0-M02/data/graph.db";
 	
 	public enum RelationType implements RelationshipType{
@@ -61,6 +63,9 @@ public class ParseBeer {
 		ReviewBeer reviewBeer = new ReviewBeer();
 		User user = new User();
 		
+		ResourceIterator<Node> resultIterator = null;
+		Map<String, Object> parameters = new HashMap<>();
+		String queryString = "";
 		
 		IndexDefinition indexDefinitionUser;
 		IndexDefinition indexDefinitionBeer;
@@ -85,14 +90,8 @@ public class ParseBeer {
 
 		}
 		// END SNIPPET: wait
-		Node beerNode = null;
-		Node userNode = null;
 		
-		ResourceIterator<Node> resultIterator = null;
-		Map<String, Object> parameters = new HashMap<>();
-		String queryString = "";
-		
-		while(j<5) {
+		while(j<1000) {
 			s=b.readLine();
 			splittedLine = s.split(": ");
 			if (splittedLine[0].equals("beer/name"))
@@ -140,18 +139,40 @@ public class ParseBeer {
 				    parameters.put("ABV", beer.getABV());
 				    parameters.put("numberReview", 0 );
 				    resultIterator = graphDb.execute( queryString, parameters ).columnAs( "n" );
-				    beerNode = resultIterator.next();
-
+				    
 				    queryString = "MERGE (m:User {username: {username},numberReview:{numberReview}}) RETURN m";
 					parameters.put( "username", user.getUserName() );
 					parameters.put("numberReview", 0 );
 					resultIterator = graphDb.execute( queryString, parameters ).columnAs( "m" );
-				    userNode = resultIterator.next();
-
-					//userNodes.get(0).setProperty("numberReview", (int)userNodes.get(0).getProperty("numberReview")+1);
-					//beerNodes.get(0).setProperty("numberReview", (int)beerNodes.get(0).getProperty("numberReview")+1);
-				
-					Relationship relationship = userNode.createRelationshipTo(beerNode, RelationType.review);
+					
+					ArrayList<Node> userNodes = new ArrayList<>();
+					try ( ResourceIterator<Node> users = graphDb.findNodes( labelUser, "username", user.getUserName() ) ){
+						
+						while ( users.hasNext() ){
+							userNodes.add( users.next() );
+						}
+						if (userNodes.size()!=0)
+							System.out.println( "The username of user  is " + userNodes.get(0).getProperty("username") );
+						else
+							System.out.println("utente non trovato");
+					}
+					
+					ArrayList<Node> beerNodes = new ArrayList<>();
+					try ( ResourceIterator<Node> beers = graphDb.findNodes( labelBeer, "Name", beer.getBeerName() ) ){
+						
+						while ( beers.hasNext() ){
+							beerNodes.add( beers.next() );
+						}
+						if (beerNodes.size()!=0)
+							System.out.println( "The beer is " + beerNodes.get(0).getProperty("Name") );
+						else
+							System.out.println("birra non trovata");
+					}
+					
+					userNodes.get(0).setProperty("numberReview", (int)userNodes.get(0).getProperty("numberReview")+1);
+					beerNodes.get(0).setProperty("numberReview", (int)beerNodes.get(0).getProperty("numberReview")+1);
+					
+					Relationship relationship = userNodes.get(0).createRelationshipTo(beerNodes.get(0), RelationType.review);
 					
 					relationship.setProperty("appearance", reviewBeer.getAppearance());
 					relationship.setProperty("aroma", reviewBeer.getAroma());
@@ -171,8 +192,5 @@ public class ParseBeer {
 		}
 
 	}
-	
-	
-	
 	
 }

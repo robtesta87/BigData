@@ -1,4 +1,4 @@
-package SocialBeer;
+package test;
 
 import java.io.File;
 import java.io.IOException;
@@ -72,11 +72,20 @@ public class prova3 {
 				Label labelBeer = DynamicLabel.label( "Beer" );
 				
 				
-				String queryString = "MERGE (m:User {username: {username}}) RETURN m";
+				String queryString = "MERGE (m:User {username: {username}}) MERGE (n:Beer {Name: {Name},Gradi: {Gradi}}) MERGE (n)-[:drink]-(m)";
 				Map<String, Object> parameters = new HashMap<>();
 				parameters.put( "username", "roberto" );
+				parameters.put( "Name", "Moretti" );
+			    parameters.put("Gradi", "4,2");
 				resultIterator = graphDb.execute( queryString, parameters ).columnAs( "m" );
-
+				
+				queryString = "MERGE (m:User {username: {username}}) MERGE (n:Beer {Name: {Name},Gradi: {Gradi}}) MERGE (n)-[:drink]-(m)";
+				
+				parameters.put( "username", "roberto2" );
+				parameters.put( "Name", "Moretti" );
+			    parameters.put("Gradi", "4,2");
+				resultIterator = graphDb.execute( queryString, parameters ).columnAs( "m" );
+				/*
 				queryString = "MERGE (m:User {username: {username}}) RETURN m";
 				parameters.put( "username", "roberto2" );
 				resultIterator = graphDb.execute( queryString, parameters ).columnAs( "m" );
@@ -85,6 +94,17 @@ public class prova3 {
 			    parameters.put( "Name", "Moretti" );
 			    parameters.put("Gradi", "4,2");
 			    resultIterator = graphDb.execute( queryString, parameters ).columnAs( "n" );
+			    
+			    queryString = "MERGE (n:Beer {Name: {Name},Gradi: {Gradi}}) RETURN n";
+			    parameters.put( "Name", "Moretti" );
+			    parameters.put("Gradi", "4,2");
+			    resultIterator = graphDb.execute( queryString, parameters ).columnAs( "n" );
+			    
+			    queryString = "MERGE (n:Beer {Name: {Name},Gradi: {Gradi}})-[:drink]-(m:User {username: {username}}) RETURN n";
+			    parameters.put( "Name", "Moretti" );
+			    parameters.put("Gradi", "4,2");
+			    parameters.put( "username", "roberto" );
+			    resultIterator = graphDb.execute( queryString, parameters ).columnAs( "n" );*/
 				/*
                // Create some users
                for ( int id = 0; id < 100; id++ )
@@ -92,7 +112,7 @@ public class prova3 {
                    Node userNode = graphDb.createNode( label );
                    userNode.setProperty( "username", "user" + id + "@neo4j.org" );
                }*/
-				System.out.println( "Users created" );
+				/*System.out.println( "Users created" );
 				ArrayList<Node> userNodes = new ArrayList<>();
 				try ( ResourceIterator<Node> users = graphDb.findNodes( labelUser, "username", "roberto" ) ){
 					
@@ -116,7 +136,7 @@ public class prova3 {
 						System.out.println("birra non trovata");
 				}
 				Relationship relationship = userNodes.get(0).createRelationshipTo(beerNodes.get(0), RelationType.drink);
-				relationship.setProperty("review", "ciao");
+				relationship.setProperty("review", "ciao");*/
 				tx.success();
 			}
 			// END SNIPPET: addUsers
