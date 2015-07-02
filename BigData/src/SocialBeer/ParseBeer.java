@@ -7,6 +7,8 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.sql.Date;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -29,7 +31,7 @@ import test.prova3.RelationType;
 
 public class ParseBeer {
 
-	private static final String PATH_review10 = "/home/roberto/workspace/git/BigData/BigData/util/ratebeer5.txt";
+	private static final String PATH_review10 = "/home/roberto/workspace/git/BigData/BigData/util/ratebeer10.txt";
 	private static final String DB_PATH = "/home/roberto/neo4j-community-2.3.0-M02/data/graph.db";
 	
 	public enum RelationType implements RelationshipType{
@@ -92,7 +94,7 @@ public class ParseBeer {
 		Map<String, Object> parameters = new HashMap<>();
 		String queryString = "";
 		
-		while(j<5) {
+		while(j<10) {
 			s=b.readLine();
 			splittedLine = s.split(": ");
 			if (splittedLine[0].equals("beer/name"))
@@ -117,8 +119,12 @@ public class ParseBeer {
 				reviewBeer.setTaste(Double.parseDouble(splittedLine[1].split("/")[0]));
 			if (splittedLine[0].equals("review/overall"))
 				reviewBeer.setOverall(Double.parseDouble(splittedLine[1].split("/")[0])/2);
-			if (splittedLine[0].equals("review/time"))
-				reviewBeer.setTime(splittedLine[1]);
+			if (splittedLine[0].equals("review/time")){
+				long input = Long.parseLong(splittedLine[1]);
+				Timestamp ts = new Timestamp(input*1000);
+				reviewBeer.setTime(timestampToDate(ts).toString());
+			}
+				
 			if (splittedLine[0].equals("review/text"))
 				reviewBeer.setText(splittedLine[1]);
 				
@@ -161,7 +167,6 @@ public class ParseBeer {
 					relationship.setProperty("time", reviewBeer.getTime());
 					relationship.setProperty("text", reviewBeer.getText());
 					
-				    
 				    tx.success();
 				}
 				
@@ -169,10 +174,24 @@ public class ParseBeer {
 				i=0;
 			}
 		}
-
+		try ( Transaction tx = graphDb.beginTx() )
+		{
+		queryString = "MATCH (u1:User)-[r1:review]->(b:Beer)<-[r2:review]-(u2:User) WHERE (r1.overall>=8 AND r2.overall>=8)  CREATE (u1)-[:affinity]->(u2)";
+		graphDb.execute( queryString, parameters );
+		tx.success();
+		}
+		System.out.println( "Shutting down database ..." );
+		// START SNIPPET: shutdownDb
+		graphDb.shutdown();
+		// END SNIPPET: shutdownDb
+		
 	}
 	
-	
-	
+	public static Date timestampToDate(Timestamp ts) {
+		  try {
+		        return new Date(ts.getTime());
+		  } catch (Exception e) { return null; }
+		 }
+
 	
 }
