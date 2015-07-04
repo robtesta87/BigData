@@ -20,14 +20,39 @@ public class parseCVS {
 		b=new BufferedReader(f);
 		s=b.readLine();
 		Reader in = new StringReader(s);
-		
+		int i=0;
+		String userName = "";
+		String beerName = "";
+		String vote ="";
+		String[] split = s.split("\"\"");
+		beerName = s.split("\"\"")[15];
+		System.out.println(beerName);
+		for (int j = 0; j < split.length; j++) {
+			if (split[j].equals("overall")){
+				beerName = split[j+2];
+				System.out.println(j+":"+split[j+1].split(":")[1].split(",")[0]);
+			}
+		}
 		//List<CSVRecord> list = CSVFormat.DEFAULT.parse(in).getRecords();
-		for (CSVRecord record : CSVFormat.DEFAULT.parse(in)) {
+		/*for (CSVRecord record : CSVFormat.DEFAULT.parse(in)) {
 			for (String field : record) {
-				System.out.print("\"" + field + "\", ");
+				if (i==0){
+					userName = field.split("\"")[3];
+					System.out.println(userName);
+				}
+				if (i==1){
+					beerName = field.split("\"")[9];
+					System.out.println(beerName);
+				}
+				if (i==2){
+					vote = field.split("\"")[14];
+					System.out.println(vote);
+				}
+				i++;	
+				//System.out.print("\"" + field + "\", ");
 			}
 			System.out.println();
-		}
+		}*/
 
 	}
 }

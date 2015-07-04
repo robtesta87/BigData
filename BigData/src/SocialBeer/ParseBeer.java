@@ -118,7 +118,7 @@ public class ParseBeer {
 			if (splittedLine[0].equals("review/taste"))
 				reviewBeer.setTaste(Double.parseDouble(splittedLine[1].split("/")[0]));
 			if (splittedLine[0].equals("review/overall"))
-				reviewBeer.setOverall(Double.parseDouble(splittedLine[1].split("/")[0])/2);
+				reviewBeer.setOverall(Double.parseDouble(splittedLine[1].split("/")[0]));
 			if (splittedLine[0].equals("review/time")){
 				long input = Long.parseLong(splittedLine[1]);
 				Timestamp ts = new Timestamp(input*1000);
