@@ -1,6 +1,8 @@
 package CoupleReview;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
 
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
@@ -21,10 +23,16 @@ public class CoupleReview2Mapper extends Mapper<Object, Text, Text, IntWritable>
 				el_coppia=ws[i];
 				for (int j = i+1; j < ws.length; j++) {
 					if (!ws[j].equals("")){
-						if (el_coppia.compareToIgnoreCase(ws[j])<0)
+						ArrayList<String> prodotti = new ArrayList<String>();
+						prodotti.add(ws[i]);
+						prodotti.add(ws[j]);
+						Collections.sort(prodotti);
+						coppia=prodotti.get(0)+","+prodotti.get(1);
+
+						/*if (el_coppia.compareToIgnoreCase(ws[j])<0)
 							coppia = el_coppia+","+ws[j];
 						else
-							coppia = ws[j]+","+el_coppia;
+							coppia = ws[j]+","+el_coppia;*/
 					}
 					word.set(coppia);
 					context.write(word, one);
