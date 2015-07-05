@@ -13,7 +13,7 @@ import org.apache.commons.csv.CSVRecord;
 public class parseCVS {
 	public static void main(String[] args) throws IOException {
 		FileReader f;
-		f=new FileReader("/home/roberto/Scaricati/export.csv");
+		f=new FileReader("/home/roberto/Scaricati/export4.csv");
 		String s;
 
 		BufferedReader b;
@@ -25,12 +25,13 @@ public class parseCVS {
 		String beerName = "";
 		String vote ="";
 		String[] split = s.split("\"\"");
-		beerName = s.split("\"\"")[15];
-		System.out.println(beerName);
+		//beerName = s.split("\"\"")[15];
+		//System.out.println(beerName);
 		for (int j = 0; j < split.length; j++) {
-			if (split[j].equals("overall")){
+			if (split[j].equals("text")){
 				beerName = split[j+2];
-				System.out.println(j+":"+split[j+1].split(":")[1].split(",")[0]);
+				//System.out.println(j+":"+split[j+1].split(":")[1].split(",")[0]);
+				System.out.println(j+":"+beerName);
 			}
 		}
 		//List<CSVRecord> list = CSVFormat.DEFAULT.parse(in).getRecords();

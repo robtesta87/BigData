@@ -27,7 +27,7 @@ public class Beer {
 		return beerName;
 	}
 	public void setBeerName(String beerName) {
-		this.beerName = beerName;
+		this.beerName = beerName.trim();
 	}
 	public String getBeerId() {
 		return beerId;
