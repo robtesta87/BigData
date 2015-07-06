@@ -28,8 +28,10 @@ public class parseCVS {
 		//beerName = s.split("\"\"")[15];
 		//System.out.println(beerName);
 		for (int j = 0; j < split.length; j++) {
-			if (split[j].equals("text")){
-				beerName = split[j+2];
+			if (split[j].equals("time")){
+				beerName = split[j+2].substring(5, 7);
+				int n = Integer.parseInt(beerName);
+				System.out.println("n"+n);
 				//System.out.println(j+":"+split[j+1].split(":")[1].split(",")[0]);
 				System.out.println(j+":"+beerName);
 			}

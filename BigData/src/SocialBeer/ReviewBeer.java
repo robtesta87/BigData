@@ -9,6 +9,7 @@ public class ReviewBeer {
 	private double overall;
 	private String time;
 	private String text;
+	private int lengthText;
 	
 	public ReviewBeer(double appearance, double aroma, double palate,
 			double taste, double overall, String time, String text) {
@@ -80,6 +81,14 @@ public class ReviewBeer {
 
 	public void setText(String text) {
 		this.text = text;
+	}
+
+	public int getLengthText() {
+		return lengthText;
+	}
+
+	public void setLengthText(int lengthText) {
+		this.lengthText = lengthText;
 	}
 	
 	

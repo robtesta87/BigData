@@ -12,6 +12,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.StringTokenizer;
 import java.util.concurrent.TimeUnit;
 
 import org.neo4j.graphdb.DynamicLabel;
@@ -26,27 +27,29 @@ import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 import org.neo4j.graphdb.schema.IndexDefinition;
 import org.neo4j.graphdb.schema.Schema;
 import org.neo4j.io.fs.FileUtils;
+import org.tartarus.snowball.ext.PorterStemmer;
 
 import test.prova3.RelationType;
 
 public class ParseBeer {
 
 	private static final String PATH_review10 = "/home/roberto/workspace/git/BigData/BigData/util/ratebeer10.txt";
-	private static final String DB_PATH = "/home/roberto/neo4j-community-2.3.0-M02/data/graph.db";
+	private static final String DB_PATH = "/home/roberto/neo4j-community-2.2.3/data/graph.db";
 	
+
 	public enum RelationType implements RelationshipType{
 		review;
 	}
 
 	public static void main(String[] args) throws IOException{
-		
+
 		System.out.println( "Starting database ..." );
 		FileUtils.deleteRecursively( new File( DB_PATH ) );
-		
+
 		// START SNIPPET: startDb
-		GraphDatabaseService graphDb = new GraphDatabaseFactory().newEmbeddedDatabase( DB_PATH );
+		GraphDatabaseService graphDb = new GraphDatabaseFactory().newEmbeddedDatabase(DB_PATH);
 		// END SNIPPET: startDb
-		
+
 		FileReader f;
 		f=new FileReader(PATH_review10);
 
@@ -58,12 +61,12 @@ public class ParseBeer {
 		int i = 0;
 		int j =0;
 		String[] splittedLine;
-		 
+
 		Beer beer = new Beer();
 		ReviewBeer reviewBeer = new ReviewBeer();
 		User user = new User();
-		
-		
+
+
 		IndexDefinition indexDefinitionUser;
 		IndexDefinition indexDefinitionBeer;
 		try ( Transaction tx = graphDb.beginTx() )
@@ -89,11 +92,11 @@ public class ParseBeer {
 		// END SNIPPET: wait
 		Node beerNode = null;
 		Node userNode = null;
-		
+
 		ResourceIterator<Node> resultIterator = null;
 		Map<String, Object> parameters = new HashMap<>();
 		String queryString = "";
-		
+		String textReview = "";
 		while(j<10) {
 			s=b.readLine();
 			splittedLine = s.split(": ");
@@ -124,41 +127,42 @@ public class ParseBeer {
 				Timestamp ts = new Timestamp(input*1000);
 				reviewBeer.setTime(timestampToDate(ts).toString());
 			}
-				
-			if (splittedLine[0].equals("review/text"))
-				reviewBeer.setText(splittedLine[1]);
-				
+			if (splittedLine[0].equals("review/text")){
+				textReview = splittedLine[1];
+				reviewBeer.setLengthText(textReview.length());
+				reviewBeer.setText(cleanText(textReview));
+			}
 			System.out.println(s);
 			i++;
 			if (i==14){
-				
+
 				// START SNIPPET: createIndex
-				
-				
+
+
 				resultIterator = null;
 				try ( Transaction tx = graphDb.beginTx() )
 				{
 					Label labelUser = DynamicLabel.label( "User" );
 					Label labelBeer = DynamicLabel.label( "Beer" );
-					
-					queryString = "MERGE (n:Beer {Name: {Name},ABV: {ABV},numberReview:{numberReview}}) RETURN n";
-				    parameters.put( "Name", beer.getBeerName() );
-				    parameters.put("ABV", beer.getABV());
-				    parameters.put("numberReview", 0 );
-				    resultIterator = graphDb.execute( queryString, parameters ).columnAs( "n" );
-				    beerNode = resultIterator.next();
 
-				    queryString = "MERGE (m:User {username: {username},numberReview:{numberReview}}) RETURN m";
+					queryString = "MERGE (n:Beer {Name: {Name},ABV: {ABV},numberReview:{numberReview}}) RETURN n";
+					parameters.put( "Name", beer.getBeerName() );
+					parameters.put("ABV", beer.getABV());
+					parameters.put("numberReview", 0 );
+					resultIterator = graphDb.execute( queryString, parameters ).columnAs( "n" );
+					beerNode = resultIterator.next();
+
+					queryString = "MERGE (m:User {username: {username},numberReview:{numberReview}}) RETURN m";
 					parameters.put( "username", user.getUserName() );
 					parameters.put("numberReview", 0 );
 					resultIterator = graphDb.execute( queryString, parameters ).columnAs( "m" );
-				    userNode = resultIterator.next();
+					userNode = resultIterator.next();
 
 					//userNodes.get(0).setProperty("numberReview", (int)userNodes.get(0).getProperty("numberReview")+1);
 					//beerNodes.get(0).setProperty("numberReview", (int)beerNodes.get(0).getProperty("numberReview")+1);
-				
+
 					Relationship relationship = userNode.createRelationshipTo(beerNode, RelationType.review);
-					
+
 					relationship.setProperty("appearance", reviewBeer.getAppearance());
 					relationship.setProperty("aroma", reviewBeer.getAroma());
 					relationship.setProperty("palate", reviewBeer.getPalate());
@@ -166,32 +170,66 @@ public class ParseBeer {
 					relationship.setProperty("overall", reviewBeer.getOverall());
 					relationship.setProperty("time", reviewBeer.getTime());
 					relationship.setProperty("text", reviewBeer.getText());
-					
-				    tx.success();
+					relationship.setProperty("lengthText", reviewBeer.getLengthText());
+
+					tx.success();
 				}
-				
+
 				j++;
 				i=0;
 			}
 		}
 		try ( Transaction tx = graphDb.beginTx() )
 		{
-		queryString = "MATCH (u1:User)-[r1:review]->(b:Beer)<-[r2:review]-(u2:User) WHERE (r1.overall>=8 AND r2.overall>=8)  CREATE (u1)-[:affinity]->(u2)";
-		graphDb.execute( queryString, parameters );
-		tx.success();
+			queryString = "MATCH (u1:User)-[r1:review]->(b:Beer)<-[r2:review]-(u2:User) WHERE (r1.overall>=8 AND r2.overall>=8)  CREATE (u1)-[:affinity]->(u2)";
+			graphDb.execute( queryString, parameters );
+			tx.success();
 		}
 		System.out.println( "Shutting down database ..." );
 		// START SNIPPET: shutdownDb
 		graphDb.shutdown();
 		// END SNIPPET: shutdownDb
-		
+
+	}
+
+	public static Date timestampToDate(Timestamp ts) {
+		try {
+			return new Date(ts.getTime());
+		} catch (Exception e) { return null; }
 	}
 	
-	public static Date timestampToDate(Timestamp ts) {
-		  try {
-		        return new Date(ts.getTime());
-		  } catch (Exception e) { return null; }
-		 }
+	private static String cleanText(String text) throws IOException{
+		FileReader f=new FileReader("util/stop-word-list.txt");
+		BufferedReader b=new BufferedReader(f);
+		String line = "";
+		String cleanText = "";
+		ArrayList<String> stopList = new ArrayList<String>();
+		while ((line = b.readLine())!=null){
+			stopList.add(line);
+		}
 
-	
+		StringTokenizer itr = new StringTokenizer(text);
+		while (itr.hasMoreTokens()) {
+			PorterStemmer stemmer = new PorterStemmer();
+			String token =itr.nextToken().split("[ \t\n,\\.\"!?$~()\\[\\]\\{\\}:;/\\\\<>+=%*]")[0];
+			boolean stop =false;
+			if (stopList.contains(token.toLowerCase()))
+				stop=true;
+
+			if (stop==false){
+				stemmer.setCurrent(token); //set string you need to stem
+				stemmer.stem();  //stem the word
+				//System.out.println(stemmer.getCurrent());//get the stemmed word
+				cleanText=cleanText+" "+stemmer.getCurrent();
+			}
+
+		}
+
+		//System.out.println(cleanText);
+		b.close();
+		f.close();
+		return cleanText;
+	}
+
+
 }
