@@ -27,7 +27,12 @@ public class Beer {
 		return beerName;
 	}
 	public void setBeerName(String beerName) {
-		this.beerName = beerName.trim();
+		String[]a = beerName.split(" ");
+		String beer="";
+		for (int i = 0; i < a.length; i++) {
+			beer=beer+a[i];
+		}
+		this.beerName = beer;
 	}
 	public String getBeerId() {
 		return beerId;
