@@ -12,9 +12,12 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.StringTokenizer;
 import java.util.concurrent.TimeUnit;
 
+import org.neo4j.cypher.ExecutionEngine;
+import org.neo4j.cypher.ExecutionResult;
 import org.neo4j.graphdb.DynamicLabel;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Label;
@@ -22,20 +25,25 @@ import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.ResourceIterator;
+import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 import org.neo4j.graphdb.schema.IndexDefinition;
 import org.neo4j.graphdb.schema.Schema;
+import org.neo4j.helpers.collection.Visitor;
 import org.neo4j.io.fs.FileUtils;
+import org.neo4j.kernel.impl.util.StringLogger;
+import org.neo4j.kernel.impl.util.StringLogger.LineLogger;
+import org.neo4j.kernel.logging.LogMarker;
 import org.tartarus.snowball.ext.PorterStemmer;
 
 import test.prova3.RelationType;
 
 public class ParseBeer {
 
-	private static final String PATH_review10 = "/home/roberto/workspace/git/BigData/BigData/util/ratebeer10.txt";
+	private static final String PATH_review10 = "/home/roberto/workspace/git/BigData/BigData/util/ratebeer.txt";
 	private static final String DB_PATH = "/home/roberto/neo4j-community-2.2.3/data/graph.db";
-	
+
 
 	public enum RelationType implements RelationshipType{
 		review;
@@ -45,6 +53,9 @@ public class ParseBeer {
 
 		System.out.println( "Starting database ..." );
 		FileUtils.deleteRecursively( new File( DB_PATH ) );
+
+		FileWriter fw = new FileWriter("tempo di esecuzione creazione db.txt");	
+		java.util.Date start = new java.util.Date();
 
 		// START SNIPPET: startDb
 		GraphDatabaseService graphDb = new GraphDatabaseFactory().newEmbeddedDatabase(DB_PATH);
@@ -97,8 +108,12 @@ public class ParseBeer {
 		Map<String, Object> parameters = new HashMap<>();
 		String queryString = "";
 		String textReview = "";
+		int k =0;
 		while(j<10) {
 			s=b.readLine();
+			//while ((s=b.readLine())!=null){
+
+
 			splittedLine = s.split(": ");
 			if (splittedLine[0].equals("beer/name"))
 				beer.setBeerName(splittedLine[1]);
@@ -128,11 +143,17 @@ public class ParseBeer {
 				reviewBeer.setTime(timestampToDate(ts).toString());
 			}
 			if (splittedLine[0].equals("review/text")){
-				textReview = splittedLine[1];
-				reviewBeer.setLengthText(textReview.length());
-				reviewBeer.setText(cleanText(textReview));
+				String[]text=splittedLine;
+				if (text.length>1){
+					textReview = text[1];
+					reviewBeer.setLengthText(textReview.length());
+					if (!(textReview.equals("")))
+						reviewBeer.setText(cleanText(textReview));
+					else
+						reviewBeer.setText("");
+				}
 			}
-			System.out.println(s);
+			//System.out.println(s);
 			i++;
 			if (i==14){
 
@@ -171,33 +192,100 @@ public class ParseBeer {
 					relationship.setProperty("time", reviewBeer.getTime());
 					relationship.setProperty("text", reviewBeer.getText());
 					relationship.setProperty("lengthText", reviewBeer.getLengthText());
-
 					tx.success();
 				}
 
 				j++;
+				System.out.println(j);
 				i=0;
 			}
 		}
-		try ( Transaction tx = graphDb.beginTx() )
+		/*try ( Transaction tx = graphDb.beginTx() )
 		{
 			queryString = "MATCH (u1:User)-[r1:review]->(b:Beer)<-[r2:review]-(u2:User) WHERE (r1.overall>=8 AND r2.overall>=8)  CREATE (u1)-[:affinity]->(u2)";
 			graphDb.execute( queryString, parameters );
 			tx.success();
-		}
+		}*/
+		StringLogger sl = new StringLogger() {
+
+			@Override
+			public void logMessage(String arg0, Throwable arg1, boolean arg2) {
+				// TODO Auto-generated method stub
+
+			}
+
+			@Override
+			public void logMessage(String arg0, LogMarker arg1) {
+				// TODO Auto-generated method stub
+
+			}
+
+			@Override
+			public void logMessage(String arg0, boolean arg1) {
+				// TODO Auto-generated method stub
+
+			}
+
+			@Override
+			public void logLongMessage(String arg0,
+					Visitor<LineLogger, RuntimeException> arg1, boolean arg2) {
+				// TODO Auto-generated method stub
+
+			}
+
+			@Override
+			protected void logLine(String arg0) {
+				// TODO Auto-generated method stub
+
+			}
+
+			@Override
+			public void flush() {
+				// TODO Auto-generated method stub
+
+			}
+
+			@Override
+			public void close() {
+				// TODO Auto-generated method stub
+
+			}
+
+			@Override
+			public void addRotationListener(Runnable arg0) {
+				// TODO Auto-generated method stub
+
+			}
+		};
+		
+		ExecutionEngine execEngine = new ExecutionEngine(graphDb, sl);
+		ExecutionResult execResult = execEngine.execute("MATCH (u1:User)-[r:review]->(b:Beer) RETURN u1,b,r");
+		String results = execResult.dumpToString();
+		System.out.println(results);
+		PrintWriter out=null;
+		out = new PrintWriter(new BufferedWriter(new FileWriter("util/prova.txt", true)));
+		out.println(results);
+		out.close();
+		
+		
 		System.out.println( "Shutting down database ..." );
 		// START SNIPPET: shutdownDb
 		graphDb.shutdown();
 		// END SNIPPET: shutdownDb
 
+		java.util.Date end = new java.util.Date();
+		fw.write("Tempo di esecuzione creazione db in ms: "+(end.getTime()-start.getTime()));
+		fw.close();
+
 	}
+
 
 	public static Date timestampToDate(Timestamp ts) {
 		try {
 			return new Date(ts.getTime());
 		} catch (Exception e) { return null; }
 	}
-	
+
 	private static String cleanText(String text) throws IOException{
 		FileReader f=new FileReader("util/stop-word-list.txt");
 		BufferedReader b=new BufferedReader(f);
@@ -211,7 +299,15 @@ public class ParseBeer {
 		StringTokenizer itr = new StringTokenizer(text);
 		while (itr.hasMoreTokens()) {
 			PorterStemmer stemmer = new PorterStemmer();
-			String token =itr.nextToken().split("[ \t\n,\\.\"!?$~()\\[\\]\\{\\}:;/\\\\<>+=%*]")[0];
+			String x = itr.nextToken();
+			String[]a=x.split("[ \t\n,\\.\"!?$~()\\[\\]\\{\\}:;/\\\\<>+=%*]");
+			String token="";
+			if (a.length>0)
+				token=a[0];
+			else {
+				System.out.println(x);
+				System.out.println(text);
+			}
 			boolean stop =false;
 			if (stopList.contains(token.toLowerCase()))
 				stop=true;
@@ -229,6 +325,8 @@ public class ParseBeer {
 		b.close();
 		f.close();
 		return cleanText;
+
+
 	}
 
 

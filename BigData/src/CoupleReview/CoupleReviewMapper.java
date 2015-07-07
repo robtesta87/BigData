@@ -14,19 +14,21 @@ public class CoupleReviewMapper extends Mapper<Object, Text, Text, Text> {
 
 	public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
 		String line = value.toString();
-		String username = extractUsername(line);
-		String beerName = extractBeerName(line);
+		if (line.contains("Node[")){
+			String username = extractUsername(line);
+			String beerName = extractBeerName(line);
 
-		int overall = Integer.parseInt(extractOverall(line));
-		if (overall>=2){
-			word.set(username);
-			context.write(word, new Text(beerName) );
+			int overall = extractOverall(line);
+			if (overall>=2){
+				word.set(username);
+				context.write(word, new Text(beerName) );
+			}
 		}
 	}
 
 	private static String extractBeerName(String line) throws IOException{
-
-		int i = 0;
+		String beerName =line.split("Name")[1].split("\"")[1];
+		/*int i = 0;
 		String beerName = "";
 		String[] splittedLine = line.split("\"\"");
 		for (int j = 0; j < splittedLine.length; j++) {
@@ -35,14 +37,14 @@ public class CoupleReviewMapper extends Mapper<Object, Text, Text, Text> {
 				return beerName;
 			}
 			//System.out.println(j+":"+split[j]);
-		}
+		}*/
 
 		return beerName;
 	}
 
 	private static String extractUsername(String line) throws IOException{
-
-		int i = 0;
+		String username = line.split("username")[1].split("\"")[1];
+		/*int i = 0;
 		String username = "";
 		String[] splittedLine = line.split("\"\"");
 		for (int j = 0; j < splittedLine.length; j++) {
@@ -51,14 +53,15 @@ public class CoupleReviewMapper extends Mapper<Object, Text, Text, Text> {
 				return username;
 			}
 			//System.out.println(j+":"+split[j]);
-		}
+		}*/
 
 		return username;
 	}
 
-	private static String extractOverall(String line) throws IOException{
+	private static int extractOverall(String line) throws IOException{
+		int overall = Integer.parseInt(line.split("overall")[1].split(":")[1].split("\\.")[0]);
 
-		int i = 0;
+		/*int i = 0;
 		String overallName = "";
 		String[] splittedLine = line.split("\"\"");
 		for (int j = 0; j < splittedLine.length; j++) {
@@ -67,8 +70,8 @@ public class CoupleReviewMapper extends Mapper<Object, Text, Text, Text> {
 				return overallName;
 			}
 			//System.out.println(j+":"+split[j]);
-		}
+		}*/
 
-		return overallName;
+		return overall;
 	}
 }

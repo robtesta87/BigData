@@ -12,6 +12,39 @@ import org.apache.commons.csv.CSVRecord;
 
 public class parseCVS {
 	public static void main(String[] args) throws IOException {
+		
+		FileReader f;
+		f=new FileReader("util/prova.txt");
+		String s;
+		String userName = "";
+		String beerName = "";
+		String text = "";
+		int overall =0;
+		int lengthReview = 0;
+		int month = 0;
+		int year = 0;
+		BufferedReader b;
+		b=new BufferedReader(f);
+		int i =0;
+		while ((s=b.readLine())!=null){
+			s=b.readLine();
+			//if ((!s.substring(0, 1).equals("+"))&&(!s.contains("u1"))&&(!s.contains("rows"))){
+			if (s.contains("Node")){
+				userName = s.split("username")[1].split("\"")[1];
+				beerName = s.split("Name")[1].split("\"")[1];
+				text = s.split("text")[1].split("\"")[1];
+				overall = Integer.parseInt(s.split("overall")[1].split(":")[1].split("\\.")[0]);
+				lengthReview = Integer.parseInt(s.split("lengthText")[1].split(":")[1].split("}")[0]);
+				month = Integer.parseInt(s.split("time")[1].split("\"")[1].substring(5, 7));
+				year =Integer.parseInt(s.split("time")[1].split("\"")[1].substring(0, 4));
+				System.out.println(text);
+				
+			}
+			i++;
+				
+		}
+		
+		/*
 		FileReader f;
 		f=new FileReader("/home/roberto/Scaricati/export2.csv");
 		String s;
@@ -56,7 +89,8 @@ public class parseCVS {
 				//System.out.print("\"" + field + "\", ");
 			}
 			System.out.println();
-		}*/
-
-	}
+		}
+		
+	}*/
+}
 }

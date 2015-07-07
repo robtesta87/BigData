@@ -12,19 +12,22 @@ import com.sun.jersey.server.impl.model.parameter.multivalued.ExtractorContainer
 public class MaxTextMapper extends Mapper<Object, Text,Text,Text> {
 
 	private final static IntWritable one = new IntWritable(1);
-    private Text word = new Text();
-    
-    public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
-    	String line = value.toString();
-		int lengthText = lengthReview(line);
+	private Text word = new Text();
 
-		word.set("maxText");
-		context.write(new Text(""+lengthText),word);
-    	
-    }
-    
-    private static int lengthReview(String line)throws IOException{
-		int length=0;
+	public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
+		String line = value.toString();
+
+		if (line.contains("Node[")){
+			int lengthText = lengthReview(line);
+
+			word.set("maxText");
+			context.write(new Text(""+lengthText),word);
+		}
+	}
+	private static int lengthReview(String line)throws IOException{
+		int length = Integer.parseInt(line.split("lengthText")[1].split(":")[1].split("}")[0]);
+
+		/*int length=0;
 		String text = "";
 		String[] splittedLine = line.split("\"\"");
 		for (int j = 0; j < splittedLine.length; j++) {
@@ -34,7 +37,7 @@ public class MaxTextMapper extends Mapper<Object, Text,Text,Text> {
 				return length;
 			}
 			//System.out.println(j+":"+split[j]);
-		}
+		}*/
 
 		return length;
 	}

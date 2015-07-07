@@ -15,23 +15,24 @@ import org.apache.hadoop.mapreduce.Mapper.Context;
 public class BestBeerMapper extends Mapper<Object, Text, Text, IntWritable> {
 	private final static IntWritable one = new IntWritable(1);
 	private Text word = new Text();
-	
+
 	public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
 		String line = value.toString();
 		String beerName = extractBeerName(line);
-		String overall = extractOverall(line);
-		
-		word.set(beerName);
-		context.write(word, one);
-		
-		word.set(beerName+",review");
-		context.write(word ,new IntWritable(Integer.parseInt(overall)));
-    	
-    }
-	
-	private static String extractBeerName(String line) throws IOException{
+		int overall = extractOverall(line);
+		if ((!line.substring(0, 1).equals("+"))&&(!line.substring(2, 4).equals("u1"))&&(!line.contains("rows"))){
 
-		int i = 0;
+			word.set(beerName);
+			context.write(word, one);
+
+			word.set(beerName+",review");
+			context.write(word ,new IntWritable(overall));
+		}
+	}
+
+	private static String extractBeerName(String line) throws IOException{
+		String beerName = line.split("Name")[1].split("\"")[1];
+		/*int i = 0;
 		String beerName = "";
 		String[] splittedLine = line.split("\"\"");
 		for (int j = 0; j < splittedLine.length; j++) {
@@ -39,14 +40,15 @@ public class BestBeerMapper extends Mapper<Object, Text, Text, IntWritable> {
 				beerName = splittedLine[j+2];
 				return beerName;
 			}
-				//System.out.println(j+":"+split[j]);
-		}
+			//System.out.println(j+":"+split[j]);
+		}*/
 
 		return beerName;
 	}
-	private static String extractOverall(String line) throws IOException{
+	private static int extractOverall(String line) throws IOException{
+		int overall = Integer.parseInt(line.split("overall")[1].split(":")[1].split("\\.")[0]);
 
-		int i = 0;
+		/*int i = 0;
 		String overallName = "";
 		String[] splittedLine = line.split("\"\"");
 		for (int j = 0; j < splittedLine.length; j++) {
@@ -54,9 +56,9 @@ public class BestBeerMapper extends Mapper<Object, Text, Text, IntWritable> {
 				overallName = splittedLine[j+1].split(":")[1].split(",")[0];
 				return overallName;
 			}
-				//System.out.println(j+":"+split[j]);
-		}
+			//System.out.println(j+":"+split[j]);
+		}*/
 
-		return overallName;
+		return overall;
 	}
 }

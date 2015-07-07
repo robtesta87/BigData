@@ -11,16 +11,19 @@ public class UserReviewMapper extends Mapper<Object, Text, Text, Text> {
 
 	public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
 		String line = value.toString();
-		String username = extractUsername(line);
-		int length = lengthReview(line);
-		word.set(username);
-		context.write(word, new Text("1 "+length));
+		if (line.contains("Node[")){
 
+			String username = extractUsername(line);
+			int length = lengthReview(line);
+			word.set(username);
+			context.write(word, new Text("1 "+length));
+		}
 	}
 
 	private static String extractUsername(String line) throws IOException{
+		String username = line.split("username")[1].split("\"")[1];
 
-		int i = 0;
+		/*int i = 0;
 		String username = "";
 		String[] splittedLine = line.split("\"\"");
 		for (int j = 0; j < splittedLine.length; j++) {
@@ -29,14 +32,16 @@ public class UserReviewMapper extends Mapper<Object, Text, Text, Text> {
 				return username;
 			}
 			//System.out.println(j+":"+split[j]);
-		}
+		}*/
 
 		return username;
 	}
-	
+
 	private static int lengthReview(String line)throws IOException{
 		int length=0;
-		String text = "";
+		length= Integer.parseInt(line.split("lengthText")[1].split(":")[1].split("}")[0]);
+
+		/*String text = "";
 		String[] splittedLine = line.split("\"\"");
 		for (int j = 0; j < splittedLine.length; j++) {
 			if (splittedLine[j].equals("text")){
@@ -45,7 +50,7 @@ public class UserReviewMapper extends Mapper<Object, Text, Text, Text> {
 				return length;
 			}
 			//System.out.println(j+":"+split[j]);
-		}
+		}*/
 
 		return length;
 	}

@@ -15,7 +15,7 @@ import org.apache.hadoop.mapreduce.Reducer.Context;
 
 public class MaxTextReducer extends Reducer<Text,Text,Text,IntWritable>{
 	 
-	private static final int TOP_K = 10;
+	private static final int TOP_K = 3;
 	 
 	 private class Pair {
 	      public String str;
