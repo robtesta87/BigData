@@ -28,6 +28,21 @@ public class MaxTextMapper extends Mapper<Object, Text,Text,Text> {
 		String text = "";
 		String[] splittedLine = line.split("\"\"");
 		for (int j = 0; j < splittedLine.length; j++) {
+			if (splittedLine[j].equals("lengthText")){
+				text = splittedLine[j+1];
+				length= Integer.parseInt((text.substring(1, text.length()-2)));
+				return length;
+			}
+			//System.out.println(j+":"+split[j]);
+		}
+
+		return length;
+	}
+	/*private static int lengthReview(String line)throws IOException{
+		int length=0;
+		String text = "";
+		String[] splittedLine = line.split("\"\"");
+		for (int j = 0; j < splittedLine.length; j++) {
 			if (splittedLine[j].equals("text")){
 				text = splittedLine[j+2];
 				length= text.length();
@@ -37,6 +52,6 @@ public class MaxTextMapper extends Mapper<Object, Text,Text,Text> {
 		}
 
 		return length;
-	}
-	
+	}*/
+
 }
