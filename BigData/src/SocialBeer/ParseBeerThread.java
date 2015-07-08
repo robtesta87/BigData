@@ -27,35 +27,25 @@ import org.neo4j.graphdb.schema.Schema;
 import org.neo4j.io.fs.FileUtils;
 import org.tartarus.snowball.ext.PorterStemmer;
 
-public class ParseBeer {
 
-	private static final String PATH_review10 = "util/ratebeer.txt";
-	//private static final String DB_PATH = "/home/roberto/neo4j-community-2.2.3/data/graph.db";
-	private static final String DB_PATH = "util/neo4j-community-2.2.3/data/graph.db";
 
+public class ParseBeerThread extends Thread{
+	
+	GraphDatabaseService graphDb;
+	BufferedReader b;
+
+	
+	
+	//costruttore
+	public ParseBeerThread(GraphDatabaseService graphDb,BufferedReader b){
+		this.graphDb=graphDb;
+		this.b=b;
+	}
 	public enum RelationType implements RelationshipType{
 		review;
 	}
-
-	public static void main(String[] args) throws IOException{
-
-		System.out.println( "Starting database ..." );
-		FileUtils.deleteRecursively( new File( DB_PATH ) );
-
-		FileWriter fw = new FileWriter("tempo di esecuzione creazione db.txt");	
-		java.util.Date start = new java.util.Date();
-
-		// START SNIPPET: startDb
-		GraphDatabaseService graphDb = new GraphDatabaseFactory().newEmbeddedDatabase(DB_PATH);
-		// END SNIPPET: startDb
-
-		FileReader f;
-		f=new FileReader(PATH_review10);
-
-		BufferedReader b;
-		b=new BufferedReader(f);
-
-		String s;
+	public void run(){
+		String s="";
 
 		int i = 0;
 		int j =0;
@@ -66,28 +56,8 @@ public class ParseBeer {
 		User user = new User();
 
 
-		IndexDefinition indexDefinitionUser;
-		IndexDefinition indexDefinitionBeer;
-		try ( Transaction tx = graphDb.beginTx() )
-		{
-			Schema schema = graphDb.schema();
-			indexDefinitionUser = schema.indexFor( DynamicLabel.label( "User" ) )
-					.on( "username" )
-					.create();
-			indexDefinitionBeer = schema.indexFor( DynamicLabel.label( "Beer" ) )
-					.on( "Name" )
-					.create();
-			tx.success();
-		}
-		// END SNIPPET: createIndex
-		// START SNIPPET: wait
-		try ( Transaction tx = graphDb.beginTx() )
-		{
-			Schema schema = graphDb.schema();
-			schema.awaitIndexOnline( indexDefinitionUser, 10, TimeUnit.SECONDS );
-			schema.awaitIndexOnline( indexDefinitionBeer, 10, TimeUnit.SECONDS );
-
-		}
+		
+		
 		// END SNIPPET: wait
 		Node beerNode = null;
 		Node userNode = null;
@@ -97,8 +67,13 @@ public class ParseBeer {
 		String queryString = "";
 		String textReview = "";
 		int k =0;
-		while(j<2000000) {
-			s=b.readLine();
+		while(j<50000) {
+			try {
+				s=b.readLine();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			//while ((s=b.readLine())!=null){
 
 
@@ -136,7 +111,12 @@ public class ParseBeer {
 					textReview = text[1];
 					reviewBeer.setLengthText(textReview.length());
 					if (!(textReview.equals("")))
-						reviewBeer.setText(cleanText(textReview));
+						try {
+							reviewBeer.setText(cleanText(textReview));
+						} catch (IOException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
 					else
 						reviewBeer.setText("");
 				}
@@ -171,7 +151,7 @@ public class ParseBeer {
 					//beerNodes.get(0).setProperty("numberReview", (int)beerNodes.get(0).getProperty("numberReview")+1);
 
 					Relationship relationship = userNode.createRelationshipTo(beerNode, RelationType.review);
-
+					
 					relationship.setProperty("appearance", reviewBeer.getAppearance());
 					relationship.setProperty("aroma", reviewBeer.getAroma());
 					relationship.setProperty("palate", reviewBeer.getPalate());
@@ -188,26 +168,14 @@ public class ParseBeer {
 				i=0;
 			}
 		}
-		
-		
-		System.out.println( "Shutting down database ..." );
-		// START SNIPPET: shutdownDb
-		graphDb.shutdown();
-		// END SNIPPET: shutdownDb
-
-		java.util.Date end = new java.util.Date();
-		fw.write("Tempo di esecuzione creazione db in ms: "+(end.getTime()-start.getTime()));
-		fw.close();
-
+		//fine run
 	}
-
-
+	//jkhlggkgkhgkhjgkhkghgkhghkghkj
 	public static Date timestampToDate(Timestamp ts) {
 		try {
 			return new Date(ts.getTime());
 		} catch (Exception e) { return null; }
 	}
-
 	private static String cleanText(String text) throws IOException{
 		FileReader f=new FileReader("util/stop-word-list.txt");
 		BufferedReader b=new BufferedReader(f);
@@ -251,6 +219,91 @@ public class ParseBeer {
 
 
 	}
+	
+	
 
+	public static void main(String[] args) throws IOException {
+		String DB_PATH = "util/neo4j-community-2.2.3/data/graph.db";
+		String PATH_review500000 = "util/ratebeer500000.txt";
+		String PATH_review500000t01000000 = "util/ratebeer500000to1000000.txt";
+		String PATH_review1000000to1500000 = "util/ratebeer1000000to1500000.txt";
+		String PATH_review1500000to2000000 = "util/ratebeer1500000to2000000.txt";
 
+		
+		System.out.println( "Starting database ..." );
+		FileUtils.deleteRecursively( new File( DB_PATH ) );
+
+		FileWriter fw = new FileWriter("tempo di esecuzione creazione db.txt");	
+		java.util.Date start = new java.util.Date();
+
+		// START SNIPPET: startDb
+		GraphDatabaseService graphDb = new GraphDatabaseFactory().newEmbeddedDatabase(DB_PATH);
+		// END SNIPPET: startDb
+		
+		IndexDefinition indexDefinitionUser;
+		IndexDefinition indexDefinitionBeer;
+		try ( Transaction tx = graphDb.beginTx() )
+		{
+			Schema schema = graphDb.schema();
+			indexDefinitionUser = schema.indexFor( DynamicLabel.label( "User" ) )
+					.on( "username" )
+					.create();
+			indexDefinitionBeer = schema.indexFor( DynamicLabel.label( "Beer" ) )
+					.on( "Name" )
+					.create();
+			tx.success();
+		}
+		// END SNIPPET: createIndex
+				// START SNIPPET: wait
+				try ( Transaction tx = graphDb.beginTx() )
+				{
+					Schema schema = graphDb.schema();
+					schema.awaitIndexOnline( indexDefinitionUser, 10, TimeUnit.SECONDS );
+					schema.awaitIndexOnline( indexDefinitionBeer, 10, TimeUnit.SECONDS );
+
+				}
+		
+		FileReader f1;
+		f1=new FileReader(PATH_review500000);
+
+		BufferedReader b1;
+		b1=new BufferedReader(f1);
+		
+		FileReader f2;
+		f2=new FileReader(PATH_review500000t01000000);
+
+		BufferedReader b2;
+		b2=new BufferedReader(f2);
+		
+		FileReader f3;
+		f3=new FileReader(PATH_review1000000to1500000);
+
+		BufferedReader b3;
+		b3=new BufferedReader(f3);
+		
+		FileReader f4;
+		f4=new FileReader(PATH_review1000000to1500000);
+
+		BufferedReader b4;
+		b4=new BufferedReader(f4);
+		
+		ParseBeerThread p1= new ParseBeerThread(graphDb, b1);
+		ParseBeerThread p2= new ParseBeerThread(graphDb, b2);
+		ParseBeerThread p3= new ParseBeerThread(graphDb, b3);
+		ParseBeerThread p4= new ParseBeerThread(graphDb, b4);
+		
+		p1.start();
+		p2.start();
+		p3.start();
+		
+		//p4.start();
+		java.util.Date end = new java.util.Date();
+		fw.write("Tempo di esecuzione creazione db in ms: "+(end.getTime()-start.getTime()));
+		fw.close();
+		//graphDb.shutdown();
+	}
+	
+	
+
+	
 }
