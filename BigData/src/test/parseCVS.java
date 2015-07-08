@@ -1,8 +1,11 @@
 package test;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.StringReader;
 import java.util.List;
@@ -26,6 +29,10 @@ public class parseCVS {
 		BufferedReader b;
 		b=new BufferedReader(f);
 		int i =0;
+		PrintWriter out=null;
+		out = new PrintWriter(new BufferedWriter(new FileWriter("util/prova2.txt", true)));
+		
+		
 		while ((s=b.readLine())!=null){
 			s=b.readLine();
 			//if ((!s.substring(0, 1).equals("+"))&&(!s.contains("u1"))&&(!s.contains("rows"))){
@@ -37,13 +44,13 @@ public class parseCVS {
 				lengthReview = Integer.parseInt(s.split("lengthText")[1].split(":")[1].split("}")[0]);
 				month = Integer.parseInt(s.split("time")[1].split("\"")[1].substring(5, 7));
 				year =Integer.parseInt(s.split("time")[1].split("\"")[1].substring(0, 4));
-				System.out.println(text);
-				
+				System.out.println("username: "+userName+" beerName: "+beerName+" overall: "+overall);
+				out.println("username: "+userName+" beerName: "+beerName+" overall: "+overall);
 			}
 			i++;
 				
 		}
-		
+		out.close();
 		/*
 		FileReader f;
 		f=new FileReader("/home/roberto/Scaricati/export2.csv");

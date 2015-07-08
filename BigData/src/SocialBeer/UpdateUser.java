@@ -22,19 +22,19 @@ public class UpdateUser {
 	private static String maxText_path = "util/MaxText.txt";
 	private static final String DB_PATH = "/home/roberto/neo4j-community-2.2.3/data/graph.db";
 
-	
+
 	public static void main(String[] args) throws IOException {
-		
+
 		int maxLengthReview = getMaxLengthReview(maxText_path);
 		System.out.println("maxLength: "+maxLengthReview);
-		
+
 
 		System.out.println( "Starting database ..." );
-		
-		
+
+
 		// START SNIPPET: startDb
 		GraphDatabaseService graphDb = new GraphDatabaseFactory().newEmbeddedDatabase( DB_PATH );
-		
+
 		FileReader f=new FileReader(userReview_path);
 		BufferedReader b;
 		b=new BufferedReader(f);
@@ -43,6 +43,7 @@ public class UpdateUser {
 		int numberReview = 0;
 		int totCharText = 0;
 		double qualityReview = 0;
+		boolean nonTrovato=false;
 		while ((line=b.readLine())!=null){
 			username = line.split("\t")[0];
 			System.out.println(username);
@@ -50,40 +51,43 @@ public class UpdateUser {
 			System.out.println("number review: "+numberReview);
 			totCharText = Integer.parseInt((line.split("\t")[1].split(": ")[2]));
 			System.out.println("tot char: "+totCharText);
-			
+
 			qualityReview = (double)(totCharText/numberReview)*(1/(double)maxLengthReview);
-					
+
 			System.out.println(qualityReview);
 			try ( Transaction tx = graphDb.beginTx() ){
 				Label labelUser = DynamicLabel.label( "User" );
-				
+
 				ArrayList<Node> userNodes = new ArrayList<>();
 				try ( ResourceIterator<Node> users = graphDb.findNodes( labelUser, "username", username ) ){
-					
+
 					while ( users.hasNext() ){
 						userNodes.add( users.next() );
 					}
 					if (userNodes.size()!=0)
 						System.out.println( "The username of user  is " + userNodes.get(0).getProperty("username") );
-					else
+					else{
 						System.out.println("utente non trovato");
+						nonTrovato=true;
+					}
+				}
+				if (nonTrovato==false){
+					userNodes.get(0).setProperty("qualityReview", qualityReview );
+					userNodes.get(0).setProperty("numberReview", numberReview );
 				}
 				
-				userNodes.get(0).setProperty("qualityReview", qualityReview );
-				userNodes.get(0).setProperty("numberReview", numberReview );
-			
 				tx.success();
 			}
-			
-			
-			
+
+			nonTrovato=false;
+
 		}
 		System.out.println( "Shutting down database ..." );
 		// START SNIPPET: shutdownDb
 		graphDb.shutdown();
 		// END SNIPPET: shutdownDb
 	}
-	
+
 	private static int getMaxLengthReview (String path) throws IOException{
 		int maxLengthReview = 0;
 		FileReader f;
@@ -93,9 +97,9 @@ public class UpdateUser {
 			b=new BufferedReader(f);
 			String s = b.readLine();
 			maxLengthReview= Integer.parseInt(s.split("\t")[1]);
-			
-			
-			
+
+
+
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

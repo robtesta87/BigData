@@ -109,7 +109,7 @@ public class ParseBeer {
 		String queryString = "";
 		String textReview = "";
 		int k =0;
-		while(j<10) {
+		while(j<10000) {
 			s=b.readLine();
 			//while ((s=b.readLine())!=null){
 
@@ -261,7 +261,7 @@ public class ParseBeer {
 		ExecutionEngine execEngine = new ExecutionEngine(graphDb, sl);
 		ExecutionResult execResult = execEngine.execute("MATCH (u1:User)-[r:review]->(b:Beer) RETURN u1,b,r");
 		String results = execResult.dumpToString();
-		System.out.println(results);
+		//System.out.println(results);
 		PrintWriter out=null;
 		out = new PrintWriter(new BufferedWriter(new FileWriter("util/prova.txt", true)));
 		out.println(results);
@@ -295,12 +295,13 @@ public class ParseBeer {
 		while ((line = b.readLine())!=null){
 			stopList.add(line);
 		}
-
+		text = text.replaceAll("[ \t\n,\\.\"!?$~()\\[\\]\\{\\}:;/\\\\<>+=%*]", " ");
 		StringTokenizer itr = new StringTokenizer(text);
 		while (itr.hasMoreTokens()) {
 			PorterStemmer stemmer = new PorterStemmer();
 			String x = itr.nextToken();
-			String[]a=x.split("[ \t\n,\\.\"!?$~()\\[\\]\\{\\}:;/\\\\<>+=%*]");
+			
+			String[]a=x.split(" ");
 			String token="";
 			if (a.length>0)
 				token=a[0];

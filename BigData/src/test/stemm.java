@@ -10,7 +10,8 @@ import org.tartarus.snowball.ext.PorterStemmer;
 
 public class stemm {
 	public static void main(String[] args) throws IOException {
-		String s="On tap at the Springfield, PA location. Poured a deep and cloudy orange (almost a copper) color with a small sized off white head. Aromas or oranges and all around citric. Tastes of oranges, light caramel and a very light grapefruit finish. I too would not believe the 80+ IBUs - I found this one to have a very light bitterness with a medium sweetness to it. Light lacing left on the glass.";
+		//String s="On tap at the Springfield, PA location. Poured a deep and cloudy orange (almost a copper) color with a small sized off white head. Aromas or oranges and all around citric. Tastes of oranges, light caramel and a very light grapefruit finish. I too would not believe the 80+ IBUs - I found this one to have a very light bitterness with a medium sweetness to it. Light lacing left on the glass.";
+		String s = "Handbottled from trade wth Sprinkle. Pours a nice dark copper color with medium size off white head. Aroma of bourbon, malt , hops and oak. Slight smokey flavor with a bourbon taste in the initial sip. Flavors of malt, vanilla and hops still remain although none dominate the brew. Taste is still very enjoyable with a smooth and balanced finish.";
 		String finalString = "";
 		FileReader f;
 		f=new FileReader("util/stop-word-list.txt");
@@ -21,11 +22,12 @@ public class stemm {
 		while ((line = b.readLine())!=null){
 			stopList.add(line);
 		}
-		
+		System.out.println(s.replaceAll("[ \t\n,\\.\"!?$~()\\[\\]\\{\\}:;/\\\\<>+=%*]", " "));
+		s=s.replaceAll("[ \t\n,\\.\"!?$~()\\[\\]\\{\\}:;/\\\\<>+=%*]", " ");
 		StringTokenizer itr = new StringTokenizer(s);
 		while (itr.hasMoreTokens()) {
 			PorterStemmer stemmer = new PorterStemmer();
-			String token =itr.nextToken().split("[ \t\n,\\.\"!?$~()\\[\\]\\{\\}:;/\\\\<>+=%*]")[0];
+			String token =itr.nextToken().split(" ")[0];
 			boolean stop =false;
 			if (stopList.contains(token.toLowerCase()))
 				stop=true;
