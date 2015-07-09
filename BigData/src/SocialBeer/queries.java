@@ -18,13 +18,14 @@ public class queries {
 	public static void main(String[] args) throws IOException {
 		System.out.println( "Starting database ..." );
 		String username = "hopdog";
-		String beer = "BarleyIslandBeastieBarrelStout";
+		String beer = "BarleyIslandSinisterMinisterBelgianBlackAle";
 		GraphDatabaseService graphDb = new GraphDatabaseFactory().newEmbeddedDatabase(DB_PATH);
 		queries q = new queries();
 		q.getAll(graphDb);
 		//q.getReviews(graphDb, username);
 		//q.getSuggestionBeers(graphDb, username);
 		//q.getSuggestionBeers(graphDb, username,beer);
+		//q.getTextReviews(graphDb, beer);
 		graphDb.shutdown();
 	}
 	
@@ -32,11 +33,11 @@ public class queries {
 	public void getAll(GraphDatabaseService graphDb) throws IOException {
 		ExecutionEngine execEngine = new ExecutionEngine(graphDb);
 		ExecutionResult execResult = execEngine.execute("MATCH (u1:User)-[r:review]->(b:Beer) RETURN u1,b,r");
-		//String results = execResult.dumpToString();
-		//System.out.println(results);
+		String results = execResult.dumpToString();
+		System.out.println(results);
 		PrintWriter out=null;
 		out = new PrintWriter(new BufferedWriter(new FileWriter("util/All.txt", true)));
-		//out.println(results);
+		out.println(results);
 		execResult.writeAsStringTo(out);
 		out.close();
 		System.out.println("GET ALL OK");
@@ -71,6 +72,18 @@ public class queries {
 		System.out.println(results);
 		PrintWriter out=null;
 		out = new PrintWriter(new BufferedWriter(new FileWriter("util/SuggestionBeer.txt", true)));
+		out.println(results);
+		out.close();
+		System.out.println("GET ALL OK");
+	}
+	
+	public void getTextReviews(GraphDatabaseService graphDb,String beerName) throws IOException {
+		ExecutionEngine execEngine = new ExecutionEngine(graphDb);
+		ExecutionResult execResult = execEngine.execute("MATCH (User)-[r:review]->(b:Beer) WHERE b.Name='"+beerName+"' RETURN r");
+		String results = execResult.dumpToString();
+		System.out.println(results);
+		PrintWriter out=null;
+		out = new PrintWriter(new BufferedWriter(new FileWriter("util/TextReview.txt", true)));
 		out.println(results);
 		out.close();
 		System.out.println("GET ALL OK");

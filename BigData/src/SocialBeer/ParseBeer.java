@@ -97,7 +97,7 @@ public class ParseBeer {
 		String queryString = "";
 		String textReview = "";
 		int k =0;
-		while(j<2000000) {
+		while(j<1000) {
 			s=b.readLine();
 			//while ((s=b.readLine())!=null){
 
@@ -217,6 +217,7 @@ public class ParseBeer {
 		while ((line = b.readLine())!=null){
 			stopList.add(line);
 		}
+		text = text.toLowerCase();
 		text = text.replaceAll("[ \t\n,\\.\"!?$~()\\[\\]\\{\\}:;/\\\\<>+=%*]", " ");
 		StringTokenizer itr = new StringTokenizer(text);
 		while (itr.hasMoreTokens()) {
