@@ -37,7 +37,7 @@ public class queries {
 		System.out.println(results);
 		PrintWriter out=null;
 		out = new PrintWriter(new BufferedWriter(new FileWriter("util/All.txt", true)));
-		out.println(results);
+		//out.println(results);
 		execResult.writeAsStringTo(out);
 		out.close();
 		System.out.println("GET ALL OK");
