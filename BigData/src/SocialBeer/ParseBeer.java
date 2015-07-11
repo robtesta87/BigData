@@ -30,8 +30,8 @@ import org.tartarus.snowball.ext.PorterStemmer;
 public class ParseBeer {
 
 	private static final String PATH_review10 = "util/ratebeer.txt";
-	//private static final String DB_PATH = "/home/roberto/neo4j-community-2.2.3/data/graph.db";
-	private static final String DB_PATH = "util/neo4j-community-2.2.3/data/graph.db";
+	private static final String DB_PATH = "/home/roberto/neo4j-community-2.2.3/data/graph.db";
+	//private static final String DB_PATH = "util/neo4j-community-2.2.3/data/graph.db";
 
 	public enum RelationType implements RelationshipType{
 		review;
@@ -97,7 +97,7 @@ public class ParseBeer {
 		String queryString = "";
 		String textReview = "";
 		int k =0;
-		while(j<1000) {
+		while(j<10) {
 			s=b.readLine();
 			//while ((s=b.readLine())!=null){
 
@@ -106,7 +106,7 @@ public class ParseBeer {
 			if (splittedLine[0].equals("beer/name"))
 				beer.setBeerName(splittedLine[1]);
 			if (splittedLine[0].equals("beer/beerId"))
-				beer.setBrewerId(splittedLine[1]);
+				beer.setBeerId(splittedLine[1]);
 			if (splittedLine[0].equals("beer/brewerId"))
 				beer.setBrewerId(splittedLine[1]);
 			if (splittedLine[0].equals("beer/ABV"))
@@ -154,10 +154,11 @@ public class ParseBeer {
 					Label labelUser = DynamicLabel.label( "User" );
 					Label labelBeer = DynamicLabel.label( "Beer" );
 
-					queryString = "MERGE (n:Beer {Name: {Name},ABV: {ABV},numberReview:{numberReview}}) RETURN n";
+					queryString = "MERGE (n:Beer {Name: {Name},ABV: {ABV},numberReview:{numberReview},beerID:{beerID}}) RETURN n";
 					parameters.put( "Name", beer.getBeerName() );
 					parameters.put("ABV", beer.getABV());
 					parameters.put("numberReview", 0 );
+					parameters.put("beerID", beer.getBeerId());
 					resultIterator = graphDb.execute( queryString, parameters ).columnAs( "n" );
 					beerNode = resultIterator.next();
 

@@ -13,7 +13,7 @@ import org.neo4j.graphdb.ResourceIterator;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 import org.neo4j.helpers.collection.IteratorUtil;
 public class queries {
-	private static final String DB_PATH = "util/neo4j-community-2.2.3/data/graph.db";
+	private static final String DB_PATH = "/home/roberto/neo4j-community-2.2.3/data/graph.db";
 
 	public static void main(String[] args) throws IOException {
 		System.out.println( "Starting database ..." );
