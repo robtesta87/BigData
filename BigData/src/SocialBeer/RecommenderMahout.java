@@ -1,13 +1,9 @@
-package test;
-
+package SocialBeer;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
 import org.apache.mahout.cf.taste.common.TasteException;
-import org.apache.mahout.cf.taste.eval.RecommenderBuilder;
-import org.apache.mahout.cf.taste.eval.RecommenderEvaluator;
-import org.apache.mahout.cf.taste.impl.eval.AverageAbsoluteDifferenceRecommenderEvaluator;
 import org.apache.mahout.cf.taste.impl.model.file.FileDataModel;
 import org.apache.mahout.cf.taste.impl.neighborhood.ThresholdUserNeighborhood;
 import org.apache.mahout.cf.taste.impl.recommender.GenericUserBasedRecommender;
@@ -17,7 +13,7 @@ import org.apache.mahout.cf.taste.neighborhood.UserNeighborhood;
 import org.apache.mahout.cf.taste.recommender.UserBasedRecommender;
 import org.apache.mahout.cf.taste.similarity.UserSimilarity;
 
-public class mahoutTest {
+public class RecommenderMahout {
 	public static void main(String[] args) throws IOException, TasteException {
 		DataModel model = new FileDataModel(new File("/home/roberto/Scrivania/dataset.csv"));
 		UserSimilarity similarity = new PearsonCorrelationSimilarity(model);
@@ -31,3 +27,4 @@ public class mahoutTest {
 		
 	}
 }
+
