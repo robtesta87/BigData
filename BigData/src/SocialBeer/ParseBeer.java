@@ -166,7 +166,9 @@ public class ParseBeer {
 					parameters.put( "username", user.getUserName() );
 					parameters.put("numberReview", 0 );
 					resultIterator = graphDb.execute( queryString, parameters ).columnAs( "m" );
-					userNode = resultIterator.next();*/
+					userNode = resultIterator.next();
+					Relationship relationship = userNode.createRelationshipTo(beerNode, RelationType.review);
+					*/
 					
 					ArrayList<Node> userNodes = new ArrayList<>();
 					Relationship relationship ;

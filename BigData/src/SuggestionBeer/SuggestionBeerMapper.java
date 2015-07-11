@@ -20,8 +20,6 @@ public class SuggestionBeerMapper extends Mapper<Object, Text, Text, IntWritable
 			word.set(beerName);
 			context.write(word, one);
 
-			word.set(beerName+",review");
-			context.write(word ,one);
 		}
 	}
 
