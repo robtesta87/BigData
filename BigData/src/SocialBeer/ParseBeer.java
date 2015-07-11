@@ -161,17 +161,38 @@ public class ParseBeer {
 					parameters.put("beerID", beer.getBeerId());
 					resultIterator = graphDb.execute( queryString, parameters ).columnAs( "n" );
 					beerNode = resultIterator.next();
-
+					/*
 					queryString = "MERGE (m:User {username: {username},numberReview:{numberReview}}) RETURN m";
 					parameters.put( "username", user.getUserName() );
 					parameters.put("numberReview", 0 );
 					resultIterator = graphDb.execute( queryString, parameters ).columnAs( "m" );
-					userNode = resultIterator.next();
-
-					//userNodes.get(0).setProperty("numberReview", (int)userNodes.get(0).getProperty("numberReview")+1);
-					//beerNodes.get(0).setProperty("numberReview", (int)beerNodes.get(0).getProperty("numberReview")+1);
-
-					Relationship relationship = userNode.createRelationshipTo(beerNode, RelationType.review);
+					userNode = resultIterator.next();*/
+					
+					ArrayList<Node> userNodes = new ArrayList<>();
+					Relationship relationship ;
+					try ( ResourceIterator<Node> users = graphDb.findNodes( labelUser, "username", user.getUserName() ) ){
+						
+						while ( users.hasNext() ){
+							userNodes.add( users.next() );
+						}
+						if (userNodes.size()!=0){
+							System.out.println( "The username of user  is " + userNodes.get(0).getProperty("username") );
+							relationship = userNodes.get(0).createRelationshipTo(beerNode, RelationType.review);
+						}
+						else{
+							System.out.println("utente non trovato");
+							queryString = "MERGE (m:User {username: {username},numberReview:{numberReview},userID:{userID}}) RETURN m";
+							parameters.put( "username", user.getUserName() );
+							parameters.put("numberReview", 0 );
+							parameters.put("userID", user.getUserName().hashCode() );
+							resultIterator = graphDb.execute( queryString, parameters ).columnAs( "m" );
+							userNode = resultIterator.next();
+							relationship = userNode.createRelationshipTo(beerNode, RelationType.review);
+						}
+					}
+					
+					
+					
 
 					relationship.setProperty("appearance", reviewBeer.getAppearance());
 					relationship.setProperty("aroma", reviewBeer.getAroma());
