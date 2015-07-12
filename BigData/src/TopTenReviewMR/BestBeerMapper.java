@@ -16,10 +16,13 @@ public class BestBeerMapper extends Mapper<Object, Text, Text, IntWritable> {
 
 	public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
 		String line = value.toString();
-
-		word.set(extractBeerName(line));
-		context.write(word, one);
-
+		if (line.contains("Node[")){
+			int overall = extractOverall(line);
+			if (overall>14){
+				word.set(extractBeerName(line));
+				context.write(word, one);
+			}
+		}
 	}
 
 	private static String extractBeerName(String line) throws IOException{
@@ -32,10 +35,27 @@ public class BestBeerMapper extends Mapper<Object, Text, Text, IntWritable> {
 				beerName = splittedLine[j+2];
 				return beerName;
 			}
-				//System.out.println(j+":"+split[j]);
+			//System.out.println(j+":"+split[j]);
 		}
 
 		return beerName;
+	}
+
+	private static int extractOverall(String line) throws IOException{
+		int overall = Integer.parseInt(line.split("overall")[1].split(":")[1].split("\\.")[0]);
+
+		/*int i = 0;
+		String overallName = "";
+		String[] splittedLine = line.split("\"\"");
+		for (int j = 0; j < splittedLine.length; j++) {
+			if (splittedLine[j].equals("overall")){
+				overallName = splittedLine[j+1].split(":")[1].split(",")[0];
+				return overallName;
+			}
+			//System.out.println(j+":"+split[j]);
+		}*/
+
+		return overall;
 	}
 	/*
 	private static String extractBeerName(String line) throws IOException{

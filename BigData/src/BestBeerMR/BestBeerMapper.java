@@ -18,10 +18,11 @@ public class BestBeerMapper extends Mapper<Object, Text, Text, IntWritable> {
 
 	public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
 		String line = value.toString();
-		String beerName = extractBeerName(line);
-		int overall = extractOverall(line);
-		if ((!line.substring(0, 1).equals("+"))&&(!line.substring(2, 4).equals("u1"))&&(!line.contains("rows"))){
-
+		
+		//if ((!line.substring(0, 1).equals("+"))&&(!line.contains("u1"))&&(!line.contains("rows"))){
+		if (line.contains("Node[")){
+			String beerName = extractBeerName(line);
+			int overall = extractOverall(line);
 			word.set(beerName);
 			context.write(word, one);
 
@@ -31,7 +32,7 @@ public class BestBeerMapper extends Mapper<Object, Text, Text, IntWritable> {
 	}
 
 	private static String extractBeerName(String line) throws IOException{
-		String beerName = line.split("Name")[1].split("\"")[1];
+		String beerName =line.split("Name")[1].split("\"")[1];
 		/*int i = 0;
 		String beerName = "";
 		String[] splittedLine = line.split("\"\"");

@@ -19,7 +19,7 @@ public class CoupleReviewMapper extends Mapper<Object, Text, Text, Text> {
 			String beerName = extractBeerName(line);
 
 			int overall = extractOverall(line);
-			if (overall>=2){
+			if (overall>=14){
 				word.set(username);
 				context.write(word, new Text(beerName) );
 			}
