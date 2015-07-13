@@ -67,7 +67,7 @@ public class ParseBeerThread extends Thread{
 		String queryString = "";
 		String textReview = "";
 		int k =0;
-		while(j<50000) {
+		while(j<500000) {
 			try {
 				s=b.readLine();
 			} catch (IOException e) {
@@ -228,6 +228,8 @@ public class ParseBeerThread extends Thread{
 		String PATH_review500000t01000000 = "util/ratebeer500000to1000000.txt";
 		String PATH_review1000000to1500000 = "util/ratebeer1000000to1500000.txt";
 		String PATH_review1500000to2000000 = "util/ratebeer1500000to2000000.txt";
+		String PATH_review2000000to2500000 = "util/ratebeer2000000to2500000.txt";
+		String PATH_review2500000to3000000 = "util/ratebeer2500000to3000000.txt";
 
 		
 		System.out.println( "Starting database ..." );
@@ -282,20 +284,36 @@ public class ParseBeerThread extends Thread{
 		b3=new BufferedReader(f3);
 		
 		FileReader f4;
-		f4=new FileReader(PATH_review1000000to1500000);
+		f4=new FileReader(PATH_review1500000to2000000);
 
 		BufferedReader b4;
 		b4=new BufferedReader(f4);
+		
+		FileReader f5;
+		f5=new FileReader(PATH_review2000000to2500000);
+
+		BufferedReader b5;
+		b5=new BufferedReader(f5);
+		
+		FileReader f6;
+		f6=new FileReader(PATH_review2500000to3000000);
+
+		BufferedReader b6;
+		b6=new BufferedReader(f6);
 		
 		ParseBeerThread p1= new ParseBeerThread(graphDb, b1);
 		ParseBeerThread p2= new ParseBeerThread(graphDb, b2);
 		ParseBeerThread p3= new ParseBeerThread(graphDb, b3);
 		ParseBeerThread p4= new ParseBeerThread(graphDb, b4);
+		ParseBeerThread p5= new ParseBeerThread(graphDb, b5);
+		ParseBeerThread p6= new ParseBeerThread(graphDb, b6);
 		
 		p1.start();
 		p2.start();
 		p3.start();
-		
+		p4.start();
+		p5.start();
+		p6.start();
 		//p4.start();
 		java.util.Date end = new java.util.Date();
 		fw.write("Tempo di esecuzione creazione db in ms: "+(end.getTime()-start.getTime()));
